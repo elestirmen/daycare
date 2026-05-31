@@ -1,0 +1,14 @@
+services:
+  daycare-web:
+    image: nginx:alpine
+    container_name: daycare-web
+    restart: unless-stopped
+    volumes:
+      - /opt/daycare:/usr/share/nginx/html:ro
+      - /opt/daycare/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - npm-net
+
+networks:
+  npm-net:
+    external: true

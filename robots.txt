@@ -1,0 +1,7 @@
+# robots.txt — A Step Above Day Care Academy (demo redesign)
+# Allow all crawlers to index the whole demo site.
+User-agent: *
+Disallow:
+
+# Sitemap location.
+Sitemap: https://daycare.perinet.org/sitemap.xml

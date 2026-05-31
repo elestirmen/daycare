@@ -1,0 +1,105 @@
+# ==========================================================================
+# .htaccess — A Step Above Day Care Academy (demo redesign)
+# --------------------------------------------------------------------------
+# IMPORTANT:
+#   * This file is for APACHE hosting ONLY.
+#   * It does NOT apply to Nginx, Netlify, Vercel, Cloudflare Pages,
+#     or GitHub Pages (those use their own configuration).
+#   * TEST on a staging environment before using in production.
+#   * Rules are wrapped in <IfModule> guards so the site keeps working
+#     even when a module is unavailable. Nothing here is aggressive.
+# ==========================================================================
+
+# --------------------------------------------------------------------------
+# 1. COMPRESSION (gzip via mod_deflate, if available)
+# --------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# --------------------------------------------------------------------------
+# 2. CACHE HEADERS (mod_expires, if available)
+#    HTML is kept short so content updates are picked up quickly.
+# --------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # HTML — revalidate often
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # CSS & JS
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType application/x-javascript "access plus 1 month"
+
+  # Images
+  ExpiresByType image/jpeg "access plus 6 months"
+  ExpiresByType image/png "access plus 6 months"
+  ExpiresByType image/gif "access plus 6 months"
+  ExpiresByType image/webp "access plus 6 months"
+  ExpiresByType image/svg+xml "access plus 6 months"
+  ExpiresByType image/x-icon "access plus 1 year"
+
+  # Fonts
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+</IfModule>
+
+# Cache-Control headers as a fallback (mod_headers, if available)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+    Header set Cache-Control "public, max-age=15552000"
+  </FilesMatch>
+  <FilesMatch "\.(woff2?|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# --------------------------------------------------------------------------
+# 3. SECURITY HEADERS (suitable for a static marketing site)
+#    Conservative defaults — review before production.
+# --------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  # HSTS — only enable once HTTPS is confirmed working site-wide:
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# --------------------------------------------------------------------------
+# 4. OPTIONAL CLEAN URLs (mod_rewrite, if available)
+#    Lets visitors use /programs instead of /programs.html.
+#    Kept simple and non-destructive.
+# --------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # If the request maps to an existing file or directory, serve it as-is.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Otherwise, if "<request>.html" exists, serve it (extensionless URLs).
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+)$ $1.html [L]
+</IfModule>
+
+# --------------------------------------------------------------------------
+# 5. DEFAULT DOCUMENT & ERROR PAGE
+# --------------------------------------------------------------------------
+DirectoryIndex index.html
+
+# Optional: send unknown paths to the homepage (uncomment if desired).
+# ErrorDocument 404 /index.html
